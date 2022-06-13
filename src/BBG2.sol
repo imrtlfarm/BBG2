@@ -2,11 +2,11 @@
 
 pragma solidity ^0.8.13;
 
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "./imports/npm/@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "./imports/npm/@openzeppelin/contracts/access/Ownable.sol";
 import "./ERC2981.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
+import "./imports/npm/@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "./imports/npm/@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
 import "./interfaces/IWrappedFantom.sol";
 import "./lib/Discounts.sol";
 import "./lib/HandleRandomNumbers.sol";
@@ -31,7 +31,7 @@ error NotEnoughMintsLeft(uint256 supplyLeft, uint256 amtMint);
 // Not enough ftm sent to mint
 error InsufficientFTM(uint256 totalCost, uint256 amtFTM);
 
-abstract contract BoilerplateERC721 is ERC721Enumerable, Ownable, ERC2981 {
+contract BBG2 is ERC721Enumerable, Ownable, ERC2981 {
   using Strings for uint256;
 
   struct TeamAndShare {
@@ -49,6 +49,7 @@ abstract contract BoilerplateERC721 is ERC721Enumerable, Ownable, ERC2981 {
   IWrappedFantom wftm;// = IWrappedFantom(0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83);
   address public lpPair; // = 0x2b4C76d0dc16BE1C31D4C1DC53bF9B45987Fc75c; - usdcftm pair
   address public addressLGE;
+  address public partner; //partner collection
   address private treasuryAddress;
   string baseURI;
   string public baseExtension = ".json";
@@ -68,6 +69,7 @@ abstract contract BoilerplateERC721 is ERC721Enumerable, Ownable, ERC2981 {
     address _royaltyAddress,
     address _addressLGE,
     address _wftm,
+    address _partner,
     uint _royaltiesPercentage,
     uint _maxSupply,
     uint _maxMintAmount
@@ -78,6 +80,7 @@ abstract contract BoilerplateERC721 is ERC721Enumerable, Ownable, ERC2981 {
         addressLGE = _addressLGE;
         lpPair = _lpPair;
         wftm = IWrappedFantom(_wftm);
+        partner = _partner;
         _setReceiver(_royaltyAddress);
         setBaseURI(_initBaseURI);
         _setRoyaltyPercentage(_royaltiesPercentage);
@@ -95,7 +98,7 @@ abstract contract BoilerplateERC721 is ERC721Enumerable, Ownable, ERC2981 {
   /* End functions for mint prep */
 
   /* Functions used during mint/after setup */
-  function mint(address token, uint amount, address collection) external payable {
+  function mint(address token, uint amount, address collection, uint256[] memory bbid, uint256[] memory pid) external payable {
     //mint is closed
     if(publicPaused)
       revert MintPaused();
@@ -111,7 +114,12 @@ abstract contract BoilerplateERC721 is ERC721Enumerable, Ownable, ERC2981 {
     if(acceptedCurrencies[token] == 0)
       revert TokenNotAuthorized();
     //require(acceptedCurrencies[token] > 0, "token not authorized");
-
+    require(amount == bbid.length && amount == pid.length, "array lengths do not match amount");
+    while (bbid.length > 0) {
+      IERC721Enumerable(bb).safeTransferFrom(msg.sender, address(this), bbid[bbid.length-1]);
+      require(IERC721Enumerable(partner).ownerOf(pid[bbid.length-1]) == msg.sender, "does not own all partner nfts");
+      delete bbid[bbid.length-1];
+    }
     uint256 supply = totalSupply();
     if(supply + amount > maxSupply) {
       revert NotEnoughMintsLeft({

@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.13;
 
-import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
+import "./IERC721Enumerable.sol";
 
 interface IBoilerplateERC721 is IERC721Enumerable {
     /* External Functions */

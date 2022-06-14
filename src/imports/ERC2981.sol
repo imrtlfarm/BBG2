@@ -10,8 +10,8 @@
  */
 pragma solidity ^0.8.4;
 // SPDX-License-Identifier: MIT
-import "./interfaces/IERC2981.sol";
-import "@openzeppelin/contracts/utils/introspection/ERC165Storage.sol";
+import "./IERC2981.sol";
+import "./ERC165Storage.sol";
 
 
 abstract contract ERC2981 is IERC2981, ERC165Storage {

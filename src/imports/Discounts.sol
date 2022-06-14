@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "../interfaces/IElasticLGE.sol";
-import "../MockLGE.sol";
-import "../lib/Math.sol";
+import "./IElasticLGE.sol";
+import "./MockLGE.sol";
+import "./Math.sol";
 
 library Discounts {
 

@@ -16,7 +16,7 @@
 
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
-import "@openzeppelin/contracts/utils/introspection/IERC165.sol";
+import "./IERC165.sol";
 
 /**
  * @dev Interface for the NFT Royalty Standard

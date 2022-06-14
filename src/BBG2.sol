@@ -2,14 +2,14 @@
 
 pragma solidity ^0.8.13;
 
-import "./imports/npm/@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
-import "./imports/npm/@openzeppelin/contracts/access/Ownable.sol";
-import "./ERC2981.sol";
-import "./imports/npm/@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "./imports/npm/@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
-import "./interfaces/IWrappedFantom.sol";
-import "./lib/Discounts.sol";
-import "./lib/HandleRandomNumbers.sol";
+import "./imports/ERC721Enumerable.sol";
+import "./imports/Ownable.sol";
+import "./imports/ERC2981.sol";
+import "./imports/IERC20.sol";
+import "./imports/IERC721Enumerable.sol";
+import "./imports/IWrappedFantom.sol";
+import "./imports/Discounts.sol";
+import "./imports/HandleRandomNumbers.sol";
 
 
 /* Custom Error Section - Use with ethers.js for custom errors */
@@ -49,8 +49,9 @@ contract BBG2 is ERC721Enumerable, Ownable, ERC2981 {
   IWrappedFantom wftm;// = IWrappedFantom(0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83);
   address public lpPair; // = 0x2b4C76d0dc16BE1C31D4C1DC53bF9B45987Fc75c; - usdcftm pair
   address public addressLGE;
+  address public immutable bbg1 = 0x70e6d946bBD73531CeA997C28D41De9Ba52Ac905;
   address public partner; //partner collection
-  address private treasuryAddress;
+  //address private treasuryAddress;
   string baseURI;
   string public baseExtension = ".json";
   uint256 public immutable maxSupply; //2000
@@ -63,8 +64,7 @@ contract BBG2 is ERC721Enumerable, Ownable, ERC2981 {
   constructor(
     string memory _name,
     string memory _symbol,
-    string memory _initBaseURI, //""
-    address _treasuryAddress,
+    string memory _initBaseURI,
     address _lpPair,
     address _royaltyAddress,
     address _addressLGE,
@@ -76,7 +76,6 @@ contract BBG2 is ERC721Enumerable, Ownable, ERC2981 {
   ) ERC721(_name, _symbol) {
         maxSupply = _maxSupply;
         maxMintAmount = _maxMintAmount;
-        treasuryAddress = _treasuryAddress;
         addressLGE = _addressLGE;
         lpPair = _lpPair;
         wftm = IWrappedFantom(_wftm);
@@ -116,7 +115,7 @@ contract BBG2 is ERC721Enumerable, Ownable, ERC2981 {
     //require(acceptedCurrencies[token] > 0, "token not authorized");
     require(amount == bbid.length && amount == pid.length, "array lengths do not match amount");
     while (bbid.length > 0) {
-      IERC721Enumerable(bb).safeTransferFrom(msg.sender, address(this), bbid[bbid.length-1]);
+      IERC721Enumerable(bbg1).safeTransferFrom(msg.sender, address(this), bbid[bbid.length-1]);
       require(IERC721Enumerable(partner).ownerOf(pid[bbid.length-1]) == msg.sender, "does not own all partner nfts");
       delete bbid[bbid.length-1];
     }

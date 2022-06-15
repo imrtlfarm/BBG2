@@ -51,7 +51,6 @@ contract BBG2 is ERC721Enumerable, Ownable, ERC2981 {
   address public addressLGE;
   address public immutable bbg1 = 0x70e6d946bBD73531CeA997C28D41De9Ba52Ac905;
   address public partner; //partner collection
-  //address private treasuryAddress;
   string baseURI;
   string public baseExtension = ".json";
   uint256 public immutable maxSupply; //2000

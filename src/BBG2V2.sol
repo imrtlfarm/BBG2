@@ -49,9 +49,16 @@ error NotEnoughMintsLeft(uint256 supplyLeft, uint256 amtMint);
 */
 error InsufficientFTM(uint256 totalCost, uint256 amtFTM);
 
-contract BBG2V2 is ERC721Enumerable, Ownable, ERC2981 {
+contract BBG2V2 is ERC721Enumerable, Ownable, ERC2981, IERC721Receiver {
   using Strings for uint256;
-
+  function onERC721Received(
+        address operator,
+        address from,
+        uint256 tokenId,
+        bytes calldata data
+    ) external returns (bytes4){
+        return(IERC721Receiver.onERC721Received.selector);
+  }
   /*
   * @dev This struct holds information for the team member address and percent share
   * @item memberAddress - Address of team member (address)
@@ -92,7 +99,7 @@ contract BBG2V2 is ERC721Enumerable, Ownable, ERC2981 {
   uint16[] private ids;
   uint16 private index = 0;
   uint public numberOfTeamMembers;
-  address public immutable  partner = 0x0000000000000000000000000000000000000000;
+  address public immutable  partner = 0x0BA97462E86Af0F87Dd15E1E14FcEB687026e0C6;
   address public immutable bbg1 = 0x70e6d946bBD73531CeA997C28D41De9Ba52Ac905;
 
   constructor(
@@ -163,10 +170,9 @@ contract BBG2V2 is ERC721Enumerable, Ownable, ERC2981 {
     //require(acceptedCurrencies[token] > 0, "token not authorized");
 
     require(_amount == bbid.length && _amount == pid.length, "array lengths do not match amount");
-    while (bbid.length > 0) {
-      IERC721Enumerable(bbg1).safeTransferFrom(msg.sender, address(this), bbid[bbid.length-1]);
-      require(IERC721Enumerable(partner).ownerOf(pid[bbid.length-1]) == msg.sender, "does not own all partner nfts");
-      delete bbid[bbid.length-1];
+    for(uint i = 0; i < bbid.length; i++) {
+      IERC721Enumerable(bbg1).safeTransferFrom(msg.sender, address(this), bbid[i]);
+      require(IERC721Enumerable(partner).ownerOf(pid[i]) == msg.sender, "does not own all partner nfts"); //@AUDIT NEED CHECK DUPLICATES
     }
 
     uint256 supply = totalSupply();
@@ -392,5 +398,17 @@ contract BBG2V2 is ERC721Enumerable, Ownable, ERC2981 {
         IERC20(_token).transfer(memberToBePaid.memberAddress, amount * memberToBePaid.memberShare / 100);
       }
     }
+  }
+
+  function addCurrency(address _acceptedCurrencyInput, uint256 _price) external onlyOwner {
+      _addCurrency(_acceptedCurrencyInput, _price);
+  }
+
+  function setTeamAndShares(address _teamAddress, uint256 _percentShare, uint256 _teamIndex) external onlyOwner {
+      _setTeamAndShares(_teamAddress, _percentShare, _teamIndex);
+  }
+
+  function setDiscountCollections(address _collectionAddress, uint _discount) external onlyOwner {
+      _setDiscountCollections(_collectionAddress, _discount);
   }
 }

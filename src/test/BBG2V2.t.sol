@@ -4,12 +4,15 @@ pragma solidity ^0.8.13;
 import {BaseTest, console} from "./base/BaseTest.sol";
 import "../BBG2V2.sol";
 
+interface ICircus {
+    function walletOfOwner(address _owner) external returns(uint256[] memory);
+}
 contract BBG2Test is BaseTest {
-    address discount = 0x0000000000000000000000000000000000000000; //screamo for testing lol
-    address partner = 0x0BA97462E86Af0F87Dd15E1E14FcEB687026e0C6; //bit goblins for testing lol 
+    address discount = 0x0000000000000000000000000000000000000000;
+    address partner = 0x46DF5672a9bA6dd5A87C5f1224263F06392861F9; //circus for testing
     address teamMember = 0x4C3490dF15edFa178333445ce568EC6D99b5d71c; //tester wallet
     address teamMember2 = 0xdDf169Bf228e6D6e701180E2e6f290739663a784; //roosh
-    address user = 0x040412efCEbADf9DE5394Eda082797aC955894e3; //guy i found who owns lotta stuff
+    address user = 0x4cea75f8eFC9E1621AC72ba8C2Ca5CCF0e45Bb3d; //guy i found who owns lotta stuff
 
     IERC721Enumerable bbg1 = IERC721Enumerable(0x70e6d946bBD73531CeA997C28D41De9Ba52Ac905);
     BBG2V2 bbg2v2;
@@ -28,8 +31,6 @@ contract BBG2Test is BaseTest {
                         );
         bbg2v2.pausePublic(false);
         bbg2v2.addCurrency(wftm, 30e18);
-        
-        
         vm.stopPrank();                   
     }
 
@@ -53,25 +54,15 @@ contract BBG2Test is BaseTest {
         vm.startPrank(user);
         console.log(bbg2v2.balanceOf(address(user)), "INIT BALANCE PRE MINT");
         uint size = 5;
-        uint[] memory bbid = new uint[](size);
-        uint[] memory pid = new uint[](size);
-        bbid[0] = 1276;
-        bbid[1] = 1178;
-        bbid[2] = 1179;
-        bbid[3] = 1181;
-        bbid[4] = 1183;
-
-        pid[0] = 1068;
-        pid[1] = 1068;
-        pid[2] = 1068;
-        pid[3] = 1068;
-        pid[4] = 1068;
+        uint[] memory bbid = ICircus(address(bbg1)).walletOfOwner(user);
+        uint[] memory cid = ICircus(address(partner)).walletOfOwner(user);
+       
         IERC20(wftm).approve(address(bbg2v2),30e30);
         for(uint i = 0; i < bbid.length; i++){
             IERC721(bbg1).approve(address(bbg2v2),bbid[i]);
         }
         
-        bbg2v2.mint(wftm, size, discount, bbid, pid);
+        bbg2v2.mint(wftm, size, discount, bbid, cid);
         uint[] memory ids = bbg2v2.walletOfOwner(address(user));
         for(uint i = 0; i < bbid.length; i++){
             console.log("MINTED ID " , ids[i]);
